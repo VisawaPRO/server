@@ -23,6 +23,11 @@
 #include "esp_tls.h"
 #include "esp_check.h"
 
+// 1. add includes for analog input
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
+#include "esp_adc/adc_oneshot.h"
+
 #if !CONFIG_IDF_TARGET_LINUX
 #include <esp_wifi.h>
 #include <esp_system.h>
@@ -37,6 +42,10 @@
  */
 
 static const char *TAG = "example";
+
+// 2. declare variables
+char analogtxt[128];
+int adc_raw;
 
 #if CONFIG_EXAMPLE_BASIC_AUTH
 
@@ -175,6 +184,7 @@ static esp_err_t hello_get_handler(httpd_req_t *req)
 
     /* Get header value string length and allocate memory for length + 1,
      * extra byte for null termination */
+    sprintf(analogtxt, "<H1> Voltage = %d </H1>",adc_raw);
     buf_len = httpd_req_get_hdr_value_len(req, "Host") + 1;
     if (buf_len > 1) {
         buf = malloc(buf_len);
@@ -258,7 +268,7 @@ static const httpd_uri_t hello = {
     .handler   = hello_get_handler,
     /* Let's pass response string in user
      * context to demonstrate it's usage */
-    .user_ctx  = "Sawaddee Naja Khunchai"
+    .user_ctx  = analogtxt
 };
 
 /* An HTTP POST handler */
